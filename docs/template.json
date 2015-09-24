@@ -1,0 +1,58 @@
+{
+    "pocInfo": {
+        "vulID": "",
+        "version":"",
+        "vulDate":"",
+        "createDate":"",
+        "updateDate":"",
+        "name": "",
+        "protocol": "",
+        "vulType": "",
+        "author": "",
+        "references": [""],
+        "appName": "",
+        "appVersion" : "",
+        "appPowerLink":"",
+        "desc" :"",
+        "samples": [""]
+    },
+
+    "pocExecute":{
+        "verify": [
+            {
+                "step": "0",
+                "method": "",
+                "vulPath": "",
+                "params": "",
+                "necessary": "",
+                "headers": {},
+                "status": "",
+                "match": {
+                    "regex": [""],
+                    "time":""
+                }
+            }
+        ],
+        "attack": [
+            {
+                "step": "0",
+                "method": "",
+                "vulPath": "",
+                "params": "",
+                "necessary": "",
+                "headers": {},
+                "status":"",                
+                "match":{
+                    "regex": [""],
+                    "time": ""
+                },
+                "result":{
+                    "AdminInfo":{
+                        "Username":"<regex>",
+                        "Password": "<regex>"
+                    }
+                }
+            }
+        ]
+    }
+}

