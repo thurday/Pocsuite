@@ -36,6 +36,8 @@ PoC 编写说明文档
 
 Pocsuite 支持 Python 2.7，如若编写 Python 格式的 PoC，需要开发者具备一定的 Python 基础
 
+[Python 代码模版请点击这里查看](./template.py)
+
 1. 首先新建一个.py文件,文件名应当符合 [PoC命名规范](#namedstandard)
 
 
@@ -130,6 +132,8 @@ Pocsuite 支持 Python 2.7，如若编写 Python 格式的 PoC，需要开发者
 <h2 id="pocjson">PoC json脚本编写步骤:</h2>
 
 json 格式的 PoC 类似于完形填空,只需要填写相应的字段的值即可。**目前 json 支持的漏洞类型比较局限，如果想实现理复杂的业务逻辑，建议使用 Python**
+
+[json 代码模版请点击这里查看](./template.json)
 
 1. 首先新建一个.json文件,文件名应当符合 **poc命名规范** 
 
@@ -277,11 +281,15 @@ json 格式的 PoC 类似于完形填空,只需要填写相应的字段的值即
 
 <h2 id="pocexample">PoC 代码示例</h2>
 
-<h3 id="pyexample">PoC py代码示例</h3> [Python 代码模版](./template.py)
+<h3 id="pyexample">PoC py代码示例</h3> 
+
+[Python 代码模版请点击这里查看](./template.py)
 
 [phpcms_2008_/ads/include/ads_place.class.php_sql注入漏洞](http://www.sebug.net/vuldb/ssvid-62274) PoC:
 
+
 ```
+
 #!/usr/bin/env python
 # coding: utf-8
 import re
@@ -373,12 +381,17 @@ register(TestPOC)
 
 ```
 
-<h3 id="jsonexample">PoC json代码示例</h3>  [json 代码模版](./template.json)
+<h3 id="jsonexample">PoC json代码示例</h3>  
+
+[json 代码模版请点击这里查看](./template.json)
+
 [phpcms_2008_/ads/include/ads_place.class.php_sql注入漏洞](http://www.sebug.net/vuldb/ssvid-62274) PoC:
 
 由于json不支持注释,所以具体字段意义请参考上文，涉及到的靶场请自行根据Sebug漏洞详情搭建。
 
+
 ```
+
 {
     "pocInfo": {
         "vulID": "62274",
