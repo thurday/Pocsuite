@@ -8,6 +8,8 @@ See the file 'docs/COPYING' for copying permission
 
 from socket import gethostbyname
 from urlparse import urlsplit
+from lib.core.data import logger
+from lib.core.enums import CUSTOM_LOGGING
 
 
 def url2ip(url):
@@ -18,3 +20,23 @@ def url2ip(url):
     if len(iport) > 1:
         return gethostbyname(iport[0]), iport[1]
     return gethostbyname(iport[0])
+
+
+def warningLog(Msg):
+    logger.log(CUSTOM_LOGGING.WARNING, Msg)
+    pass
+
+
+def infoLog(Msg):
+    logger.log(CUSTOM_LOGGING.SYSINFO, Msg)
+    pass
+
+
+def sucLog(Msg):
+    logger.log(CUSTOM_LOGGING.SUCCESS, Msg)
+    pass
+
+
+def errLog(Msg):
+    logger.log(CUSTOM_LOGGING.ERROR, Msg)
+    pass
